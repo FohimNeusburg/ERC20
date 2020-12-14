@@ -51,9 +51,20 @@ contract ERC20 is IERC20, GSNContext {
     }
     
     function approve(address _spender, uint _amount) public override returns (bool) {
-        require (_balances[msg.sender] >= _amount);
+        require (_balances[msg.sender] >= _amount, "ERC20: Amount is lower than requested from transfer");
+    
         _allowances[msg.sender][_spender] = _allowances[msg.sender][_spender].add(_amount);
+    
         emit Approval(msg.sender, _spender, _amount);
+    
+        return true;
+    }
+    
+    function decreaseApproval(address _from, address _spender, uint _amount) public returns (bool) {
+        require (_allowances[_from][_spender] >= _amount, "ERC20: Amount is lower than requested from transfer");
+        
+        _allowances[_from][_spender] = _allowances[_from][_spender].sub(_amount);
+        
         return true;
     }
     
@@ -63,7 +74,7 @@ contract ERC20 is IERC20, GSNContext {
     }
     
     function _transfer(address _from, address _too, uint _amount) internal returns (bool) {
-        require (_balances[_from] >=_amount);
+        require (_balances[_from] >=_amount, "ERC20: Amount is lower than requested from transfer");
         require (_from != address(0), "ERC20: Is not the zero address");
         require (_too != address(0), "ERC20: Is not the zero address");
         
@@ -78,8 +89,8 @@ contract ERC20 is IERC20, GSNContext {
     }
     
     function transferFrom(address _from, address _spender, uint _amount) public override returns (bool) {
-        require (_allowances[_from][_spender] >= _amount);
-        require (_balances[_from] >= _amount);
+        require (_allowances[_from][_spender] >= _amount, "ERC20: Amount is lower than requested from transfer");
+        require (_balances[_from] >= _amount, "ERC20: Amount is lower than requested from transfer");
         
         _transfer(_from, _msgSender(), _amount);
         
@@ -89,6 +100,8 @@ contract ERC20 is IERC20, GSNContext {
         
         return true;
     }
+    
+    
     
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
 }
