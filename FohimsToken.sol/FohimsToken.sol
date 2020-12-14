@@ -58,11 +58,18 @@ contract ERC20 is IERC20, GSNContext {
     }
     
     function transfer(address _too, uint _amount) public override returns (bool) {
-        require (_balances[msg.sender] >=_amount);
-        require (msg.sender != address(0), "ERC20: Is not the zero address");
+        _transfer(_msgSender(), _too, _amount);
+        return true;
+    }
+    
+    function _transfer(address _from, address _too, uint _amount) internal returns (bool) {
+        require (_balances[_from] >=_amount);
+        require (_from != address(0), "ERC20: Is not the zero address");
         require (_too != address(0), "ERC20: Is not the zero address");
         
-        _balances[msg.sender] = _balances[msg.sender].sub(_amount);
+        _beforeTokenTransfer(_msgSender(),  _too, _amount);
+        
+        _balances[_from] = _balances[_from].sub(_amount);
         _balances[_too] = _balances[_too].add(_amount);
         
         emit Transfer(msg.sender, _too, _amount);
@@ -74,9 +81,11 @@ contract ERC20 is IERC20, GSNContext {
         require (_allowances[_from][_spender] >= _amount);
         require (_balances[_from] >= _amount);
         
-        transfer(_spender, _amount);
+        _transfer(_from, _msgSender(), _amount);
         
         _allowances[_from][_spender] = _allowances[_from][_spender].sub(_amount);
+        
+        emit Approval(_from, _msgSender(), _amount);
         
         return true;
     }
