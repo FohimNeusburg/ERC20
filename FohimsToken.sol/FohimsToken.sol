@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.4;
 
-import"./SafeMath.sol";
 import"./GSNContext.sol";
 import"./IERC20.sol";
+import"./Pausable.sol";
+import"./SafeMath.sol";
 
-contract ERC20 is IERC20, GSNContext {
+contract ERC20 is IERC20, GSNContext, Pausable {
     
     using SafeMath for uint256;
     
@@ -104,4 +105,5 @@ contract ERC20 is IERC20, GSNContext {
     
     
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
+    
 }
