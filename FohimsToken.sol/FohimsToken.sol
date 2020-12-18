@@ -51,7 +51,7 @@ contract ERC20 is IERC20, GSNContext, Pausable {
         return _allowances[_from][_spender];
     }
     
-    function approve(address _spender, uint _amount) public override returns (bool) {
+    function approve(address _spender, uint _amount) public override whenNotPaused() returns (bool) {
         require (_balances[msg.sender] >= _amount, "ERC20: Amount is lower than requested from transfer");
     
         _allowances[msg.sender][_spender] = _allowances[msg.sender][_spender].add(_amount);
@@ -61,7 +61,7 @@ contract ERC20 is IERC20, GSNContext, Pausable {
         return true;
     }
     
-    function decreaseApproval(address _from, address _spender, uint _amount) public returns (bool) {
+    function decreaseApproval(address _from, address _spender, uint _amount) public whenNotPaused() returns (bool) {
         require (_allowances[_from][_spender] >= _amount, "ERC20: Amount is lower than requested from transfer");
         
         _allowances[_from][_spender] = _allowances[_from][_spender].sub(_amount);
@@ -69,7 +69,7 @@ contract ERC20 is IERC20, GSNContext, Pausable {
         return true;
     }
     
-    function transfer(address _too, uint _amount) public override returns (bool) {
+    function transfer(address _too, uint _amount) public override whenNotPaused() returns (bool) {
         _transfer(_msgSender(), _too, _amount);
         return true;
     }
@@ -89,7 +89,7 @@ contract ERC20 is IERC20, GSNContext, Pausable {
         return true;
     }
     
-    function transferFrom(address _from, address _spender, uint _amount) public override returns (bool) {
+    function transferFrom(address _from, address _spender, uint _amount) public override whenNotPaused() returns (bool) {
         require (_allowances[_from][_spender] >= _amount, "ERC20: Amount is lower than requested from transfer");
         require (_balances[_from] >= _amount, "ERC20: Amount is lower than requested from transfer");
         
@@ -102,8 +102,24 @@ contract ERC20 is IERC20, GSNContext, Pausable {
         return true;
     }
     
+    function mint(uint _amount) public whenPaused() onlyOwner() {
+        require (msg.sender == _owner);
+        require (_amount > 0);
+        
+        _beforeTokenTransfer(address(0), _owner, _amount);
+        
+        _totalsupply = _totalsupply.add(_amount);
+        _balances[_owner] = _balances[_owner].add(_amount);
+        
+        emit Transfer(address(0), _owner, _amount);
+    }
     
+    function burn(uint _amount) public whenPaused() onlyOwner() {
+        require (_totalsupply >= _amount);
+        require (_amount > 0);
+        
+        _totalsupply = _totalsupply.sub(_amount);
+    }
     
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
-    
 }
