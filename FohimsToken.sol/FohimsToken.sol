@@ -6,7 +6,7 @@ import"./IERC20.sol";
 import"./Pausable.sol";
 import"./SafeMath.sol";
 
-contract ERC20 is IERC20, GSNContext, Pausable {
+contract ERC20 is GSNContext, IERC20, Pausable {
     
     using SafeMath for uint256;
     
@@ -122,4 +122,5 @@ contract ERC20 is IERC20, GSNContext, Pausable {
     }
     
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
+    
 }
